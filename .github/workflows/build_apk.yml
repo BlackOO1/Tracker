@@ -1,0 +1,89 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:   # allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    name: Build Android APK & AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: 'stable'
+
+      - name: Get Flutter packages
+        working-directory: expense_tracker
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: expense_tracker
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Build release APK
+        working-directory: expense_tracker
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Build release App Bundle (Play Store)
+        working-directory: expense_tracker
+        run: flutter build appbundle --release --no-tree-shake-icons
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expense-tracker-apk
+          path: expense_tracker/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Upload AAB artifact (Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: expense-tracker-aab
+          path: expense_tracker/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Create GitHub Release (on push to main)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}.0.0
+          name: "Budget Planner v${{ github.run_number }}.0.0"
+          body: |
+            ## 💰 Budget Planner – Expense Tracker
+            
+            ### What's in this release:
+            - ✅ Dark mode UI matching Expense Tracker.xlsx design
+            - ✅ 5 Budget categories: Expenses, Bills, Income, Debt, Savings
+            - ✅ 10 currencies: USD, INR, EUR, GBP, JPY, PHP, AED, CAD, AUD, SGD
+            - ✅ Charts: Pie Chart, Line Chart (Monthly Trend), Bar Chart (Expected vs Actual)
+            - ✅ Live date & time display
+            - ✅ Full transaction history with date/time & swipe to delete
+            - ✅ 100% offline – no internet required
+            
+            ### Install on Android:
+            1. Download `expense-tracker-apk` below
+            2. On your phone: **Settings → Security → Install Unknown Apps → Allow**
+            3. Open the downloaded APK and tap **Install**
+            
+            > `app-release.aab` is for **Google Play Store** upload only.
+          files: |
+            expense_tracker/build/app/outputs/flutter-apk/app-release.apk
+            expense_tracker/build/app/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

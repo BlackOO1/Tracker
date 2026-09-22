@@ -36,29 +36,42 @@ class AuthService extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      if (_auth == null || _firestore == null) {
+      if (_auth == null) {
         return 'Firebase is not initialized. Please configure Firebase first.';
       }
 
-      final userCred = await _auth!.signInWithCredential(credential);
+      await _auth!.signInWithCredential(credential);
 
-      // Save user to Firestore for admin panel
-      await _firestore!.collection('users').doc(userCred.user!.uid).set({
-        'uid': userCred.user!.uid,
-        'name': userCred.user!.displayName ?? 'Unknown',
-        'email': userCred.user!.email ?? '',
-        'photoUrl': userCred.user!.photoURL ?? '',
-        'lastSignIn': FieldValue.serverTimestamp(),
-        'firstSignIn': userCred.additionalUserInfo?.isNewUser == true
-            ? FieldValue.serverTimestamp()
-            : FieldValue.delete(),
-      }, SetOptions(merge: true));
+      // Save user to Firestore in background (fire-and-forget, never blocks login)
+      _saveUserToFirestore();
 
       notifyListeners();
       return null; // null = success
     } catch (e) {
       return e.toString();
     }
+  }
+
+  /// Saves user profile to Firestore for the admin panel.
+  /// Fire-and-forget with a timeout — never blocks the UI.
+  void _saveUserToFirestore() {
+    final user = currentUser;
+    if (user == null || _firestore == null) return;
+
+    _firestore!
+        .collection('users')
+        .doc(user.uid)
+        .set({
+          'uid': user.uid,
+          'name': user.displayName ?? 'Unknown',
+          'email': user.email ?? '',
+          'photoUrl': user.photoURL ?? '',
+          'lastSignIn': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true))
+        .timeout(const Duration(seconds: 5))
+        .catchError((e) {
+          debugPrint('Firestore save skipped: $e');
+        });
   }
 
   // ── Passwordless Email Link Sign-In ─────────────────────────────────────────
@@ -100,23 +113,12 @@ class AuthService extends ChangeNotifier {
           return 'Email address not found. Please try logging in again.';
         }
 
-        final userCred = await _auth!.signInWithEmailLink(email: email, emailLink: emailLink);
+        await _auth!.signInWithEmailLink(email: email, emailLink: emailLink);
         
         await prefs.remove('emailForSignIn');
 
-        // Save user to Firestore for admin panel
-        if (_firestore != null && userCred.user != null) {
-          await _firestore!.collection('users').doc(userCred.user!.uid).set({
-            'uid': userCred.user!.uid,
-            'name': userCred.user!.displayName ?? 'Unknown',
-            'email': userCred.user!.email ?? '',
-            'photoUrl': userCred.user!.photoURL ?? '',
-            'lastSignIn': FieldValue.serverTimestamp(),
-            'firstSignIn': userCred.additionalUserInfo?.isNewUser == true
-                ? FieldValue.serverTimestamp()
-                : FieldValue.delete(),
-          }, SetOptions(merge: true));
-        }
+        // Save user to Firestore in background (fire-and-forget)
+        _saveUserToFirestore();
 
         notifyListeners();
         return null; // null = success
@@ -128,8 +130,12 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth?.signOut();
-    await _googleSignIn.signOut();
+    try {
+      await _auth?.signOut().timeout(const Duration(seconds: 5));
+    } catch (_) {}
+    try {
+      await _googleSignIn.signOut().timeout(const Duration(seconds: 5));
+    } catch (_) {}
     _settingsBox.delete('pin'); // Clear PIN on sign-out
     notifyListeners();
   }

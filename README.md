@@ -1,6 +1,6 @@
 # 💰 Budget Planner — Expense Tracker App
 
-A beautiful, fully offline personal budget planner built with **Flutter & Dart**, designed from the `Expense Tracker.xlsx` spreadsheet template.
+A beautiful, fully offline personal budget planner built with **Flutter & Dart**.
 
 [![Build APK](https://github.com/BlackOO1/Tracker/actions/workflows/build_apk.yml/badge.svg)](https://github.com/BlackOO1/Tracker/actions/workflows/build_apk.yml)
 
@@ -32,7 +32,7 @@ A beautiful, fully offline personal budget planner built with **Flutter & Dart**
 
 ### Option 2: Build with Android Studio
 1. Clone this repo
-2. Open `expense_tracker/` folder in Android Studio
+2. Open the project root folder in Android Studio
 3. Let it sync (File → Sync Project with Gradle)
 4. Run on emulator or device (▶ button)
 
@@ -47,7 +47,6 @@ A beautiful, fully offline personal budget planner built with **Flutter & Dart**
 
 ### Run Locally
 ```bash
-cd expense_tracker
 flutter pub get
 flutter run
 ```
@@ -80,7 +79,7 @@ Check the [Actions tab](https://github.com/BlackOO1/Tracker/actions) to see buil
 ## 🗂️ Project Structure
 
 ```
-expense_tracker/
+Tracker/
 ├── lib/
 │   ├── main.dart                    # App entry point
 │   ├── constants/
@@ -89,6 +88,9 @@ expense_tracker/
 │   ├── models/
 │   │   ├── transaction_model.dart   # Transaction data model (Hive)
 │   │   └── category_model.dart      # Category budget model (Hive)
+│   ├── services/
+│   │   ├── auth_service.dart        # Google Sign-In + Firebase Auth
+│   │   └── sms_parser_service.dart  # SMS transaction parsing
 │   ├── state/
 │   │   └── budget_provider.dart     # All business logic & calculations
 │   └── ui/
@@ -97,20 +99,28 @@ expense_tracker/
 │       │   ├── overview_screen.dart # Dashboard + KPI cards
 │       │   ├── budgets_screen.dart  # Category budget allocations
 │       │   ├── history_screen.dart  # Full transaction history
-│       │   └── analytics_screen.dart# Pie / Line / Bar charts
+│       │   ├── analytics_screen.dart# Pie / Line / Bar charts
+│       │   ├── login_screen.dart    # Login / authentication
+│       │   ├── pin_screen.dart      # PIN lock screen
+│       │   ├── admin_screen.dart    # Admin settings
+│       │   └── sms_suggestions_screen.dart # SMS auto-detect
 │       └── widgets/
 │           ├── add_transaction_sheet.dart  # Add transaction form
 │           ├── kpi_card.dart               # KPI card widget
 │           └── section_card.dart           # Card container widget
 ├── android/                         # Android platform config
+├── assets/
+│   └── icon.png                     # App launcher icon
+├── test/                            # Unit & widget tests
 ├── pubspec.yaml                     # Flutter dependencies
-└── preview.html                     # Interactive browser preview
+└── .github/
+    └── workflows/
+        └── build_apk.yml           # CI/CD: auto-build APK on push
 ```
 
 ---
 
 ## 🎨 Design
-Colors extracted directly from `Expense Tracker.xlsx` theme:
 
 | Color | Hex | Usage |
 |-------|-----|-------|

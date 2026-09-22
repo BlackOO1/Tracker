@@ -29,33 +29,29 @@ jobs:
           channel: 'stable'
 
       - name: Get Flutter packages
-        working-directory: expense_tracker
         run: flutter pub get
 
       - name: Analyze code
-        working-directory: expense_tracker
         run: flutter analyze --no-fatal-warnings
 
       - name: Build release APK
-        working-directory: expense_tracker
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Build release App Bundle (Play Store)
-        working-directory: expense_tracker
         run: flutter build appbundle --release --no-tree-shake-icons
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: expense-tracker-apk
-          path: expense_tracker/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
       - name: Upload AAB artifact (Play Store)
         uses: actions/upload-artifact@v4
         with:
           name: expense-tracker-aab
-          path: expense_tracker/build/app/outputs/bundle/release/app-release.aab
+          path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Create GitHub Release (on push to main)
@@ -83,7 +79,7 @@ jobs:
             
             > `app-release.aab` is for **Google Play Store** upload only.
           files: |
-            expense_tracker/build/app/outputs/flutter-apk/app-release.apk
-            expense_tracker/build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

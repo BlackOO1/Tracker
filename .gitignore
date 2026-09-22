@@ -1,12 +1,44 @@
-# Flutter
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter / Dart / Pub
+**/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
-build/
-*.iml
-*.ipr
-*.iws
+.pub-cache/
+.pub/
+/build/
+/coverage/
+pubspec.lock
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
 
 # Android
 **/android/.gradle/
@@ -16,6 +48,9 @@ build/
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
 **/*.keystore
 **/*.jks
 
@@ -29,27 +64,13 @@ build/
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/ephemeral/
 
-# Dart/Flutter misc
-*.log
-pubspec.lock
-
-# IDEs
-.idea/
-.vscode/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
 # Hive local database (user data, do not commit)
 **/hive/
 **/*.hive
 **/*.lock
 
-# Preview & helper scripts
-inspect_excel.ps1
-parse_design.ps1
-parse_theme.ps1
-parse_charts.ps1
-check_environment.ps1
-extracted_excel_data/
+# Widget Preview
+.widget_preview/
+
+# Metadata
+.metadata

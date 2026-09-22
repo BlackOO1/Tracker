@@ -34,17 +34,17 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
         context: context, initialDate: _dateTime,
         firstDate: DateTime(2020), lastDate: DateTime(2030),
         builder: (ctx, child) => Theme(
-          data: Theme.of(ctx).copyWith(colorScheme: ColorScheme.dark(primary: AppColors.teal, surface: AppColors.surface)),
+          data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.dark(primary: AppColors.teal, surface: AppColors.surface)),
           child: child!,
         ));
-    if (d == null) return;
+    if (d == null || !mounted) return;
     final t = await showTimePicker(
         context: context, initialTime: TimeOfDay.fromDateTime(_dateTime),
         builder: (ctx, child) => Theme(
-          data: Theme.of(ctx).copyWith(colorScheme: ColorScheme.dark(primary: AppColors.teal, surface: AppColors.surface)),
+          data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.dark(primary: AppColors.teal, surface: AppColors.surface)),
           child: child!,
         ));
-    if (t == null) return;
+    if (t == null || !mounted) return;
     setState(() => _dateTime = DateTime(d.year, d.month, d.day, t.hour, t.minute));
   }
 
@@ -114,7 +114,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: sel ? c.withOpacity(0.2) : AppColors.background,
+                    color: sel ? c.withValues(alpha: 0.2) : AppColors.background,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: sel ? c : AppColors.divider, width: sel ? 1.5 : 1),
                   ),
@@ -152,7 +152,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
         const Text('CATEGORY', style: TextStyle(color: AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.06)),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: _category,
+          initialValue: _category,
           dropdownColor: AppColors.surface,
           style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
           decoration: InputDecoration(filled: true, fillColor: AppColors.background,

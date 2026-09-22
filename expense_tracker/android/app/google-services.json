@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "493297513092",
+    "project_id": "budget-planner-c6fc0",
+    "storage_bucket": "budget-planner-c6fc0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493297513092:android:e467d2c121215b2b4048d1",
+        "android_client_info": {
+          "package_name": "com.budgetplanner.expense_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493297513092-sapanmgiton9s8k7490foj7ogk4ta27m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.budgetplanner.expense_tracker",
+            "certificate_hash": "f7eb1b2e4a8c7e0c0fec5f7df364c136a06be5f5"
+          }
+        },
+        {
+          "client_id": "493297513092-585ahfa7tcjlarpk34qgqbalftfn0jj5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoxTMYA-DBEDNenWZ7rKxOfpBVNuoDZkQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493297513092-585ahfa7tcjlarpk34qgqbalftfn0jj5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

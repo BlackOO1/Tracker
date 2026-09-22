@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../models/transaction_model.dart';
 import '../../state/budget_provider.dart';
 import '../../constants/app_colors.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/section_card.dart';
+import 'history_screen.dart' as history;
 
 class OverviewScreen extends StatelessWidget {
   const OverviewScreen({super.key});
@@ -12,15 +14,19 @@ class OverviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<BudgetProvider>();
-    final fmt = (double usd) => Currencies.format(usd, p.currency);
-    final now = DateTime.now();
-    final dateStr = DateFormat('EEEE, MMM d, yyyy  •  HH:mm:ss').format(now);
-
+    String fmt(double usd) => Currencies.format(usd, p.currency);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Live date/time header
-        Text(dateStr, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+        // Live date/time header (ticking)
+        StreamBuilder(
+          stream: Stream.periodic(const Duration(seconds: 1)),
+          builder: (context, _) {
+            final now = DateTime.now();
+            final dateStr = DateFormat('EEEE, MMM d, yyyy  •  HH:mm:ss').format(now);
+            return Text(dateStr, style: const TextStyle(color: AppColors.textMuted, fontSize: 11));
+          }
+        ),
         const SizedBox(height: 12),
 
         // Hero: Amount Left To Spend
@@ -44,11 +50,47 @@ class OverviewScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
+        // SMS Auto-read Banner
+        GestureDetector(
+          onTap: () {
+            // Wait for routing
+            Navigator.pushNamed(context, '/sms');
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.lavender.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.lavender.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.message, color: AppColors.lavender),
+                SizedBox(width: 12),
+                Expanded(child: Text('Auto-read Bank SMS', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold))),
+                Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.lavender),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
         // Recent transactions
         SectionCard(
           title: 'RECENT ACTIVITY',
           trailing: TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // Instead of finding state, we will define a clean fallback mechanism
+              // or navigate using a Named Route if History is defined in main.dart
+              // Alternatively, push the HistoryScreen wrapped in a basic layout
+              Navigator.push(context, MaterialPageRoute(
+                builder: (_) => Scaffold(
+                  appBar: AppBar(title: const Text('All Transactions')),
+                  backgroundColor: AppColors.background,
+                  body: const history.HistoryScreen(),
+                ),
+              ));
+            },
             child: const Text('See All', style: TextStyle(color: AppColors.teal, fontSize: 12)),
           ),
           child: Column(
@@ -92,9 +134,9 @@ class _HeroCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: p.isOnTrack ? AppColors.teal.withOpacity(0.15) : AppColors.peach.withOpacity(0.15),
+                color: p.isOnTrack ? AppColors.teal.withValues(alpha: 0.15) : AppColors.peach.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: p.isOnTrack ? AppColors.teal.withOpacity(0.4) : AppColors.peach.withOpacity(0.4)),
+                border: Border.all(color: p.isOnTrack ? AppColors.teal.withValues(alpha: 0.4) : AppColors.peach.withValues(alpha: 0.4)),
               ),
               child: Text(
                 p.isOnTrack ? '✦ On Track' : '⚠ Over Budget',
@@ -125,7 +167,7 @@ class _HeroCard extends StatelessWidget {
 
 class _TxRow extends StatelessWidget {
   const _TxRow({required this.tx, required this.fmt});
-  final tx;
+  final TransactionModel tx;
   final String Function(double) fmt;
 
   @override
@@ -137,7 +179,7 @@ class _TxRow extends StatelessWidget {
       child: Row(children: [
         Container(
           width: 36, height: 36,
-          decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
           child: Center(child: Text(isIn ? '+' : '−', style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 16))),
         ),
         const SizedBox(width: 10),

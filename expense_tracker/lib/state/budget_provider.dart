@@ -109,10 +109,11 @@ class BudgetProvider extends ChangeNotifier {
     _settings = Hive.box('settings');
 
     _currency = _settings.get('currency', defaultValue: 'USD');
-    _rolloverUSD = _settings.get('rollover', defaultValue: 250.0);
+    _rolloverUSD = _settings.get('rollover', defaultValue: 0.0);
 
     if (_catBox.isEmpty) _seedDefaultCategories();
-    if (_txBox.isEmpty)  _seedSampleTransactions();
+    // Start with empty transactions as requested
+    // if (_txBox.isEmpty)  _seedSampleTransactions();
 
     notifyListeners();
   }
@@ -157,6 +158,11 @@ class BudgetProvider extends ChangeNotifier {
 
   Future<void> deleteTransaction(String id) async {
     await _txBox.delete(id);
+    notifyListeners();
+  }
+
+  Future<void> clearAllTransactions() async {
+    await _txBox.clear();
     notifyListeners();
   }
 
@@ -224,29 +230,5 @@ class BudgetProvider extends ChangeNotifier {
     for (final c in defaults) { _catBox.put(c.name, c); }
   }
 
-  void _seedSampleTransactions() {
-    final now = DateTime.now();
-    final samples = [
-      ('income','Paycheck',1750.0,'Bi-weekly salary', DateTime(now.year,now.month,10,8,0)),
-      ('income','Side Hustle',120.0,'Freelance design', DateTime(now.year,now.month,3,11,0)),
-      ('expense','Food',64.5,'Weekly groceries', DateTime(now.year,now.month,18,14,30)),
-      ('expense','Social Life',42.0,'Dinner with friends', DateTime(now.year,now.month,17,20,15)),
-      ('expense','Transportation',35.0,'Cab rides', DateTime(now.year,now.month,8,12,30)),
-      ('bill','Electricity',115.0,'Monthly power bill', DateTime(now.year,now.month,15,9,0)),
-      ('bill','Mobile',55.0,'Monthly mobile plan', DateTime(now.year,now.month,5,9,0)),
-      ('debt','Student Loans',200.0,'Monthly instalment', DateTime(now.year,now.month,15,10,0)),
-      ('savings','Travel Fund',150.0,'Monthly savings transfer', DateTime(now.year,now.month,2,10,0)),
-    ];
-    for (final s in samples) {
-      final tx = TransactionModel(
-        id: const Uuid().v4(),
-        dateTime: s.$5,
-        type: s.$1,
-        category: s.$2,
-        amountUSD: s.$3,
-        description: s.$4,
-      );
-      _txBox.put(tx.id, tx);
-    }
-  }
+
 }

@@ -12,7 +12,7 @@ class AnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<BudgetProvider>();
-    final fmt = (double usd) => Currencies.format(usd, p.currency);
+    String fmt(double usd) => Currencies.format(usd, p.currency);
     final r = p.exchangeRate;
 
     return ListView(
@@ -48,9 +48,26 @@ class AnalyticsScreen extends StatelessWidget {
         SectionCard(
           title: 'MONTHLY SPENDING TREND',
           subtitle: 'Last 6 months • updates with currency',
-          child: SizedBox(
-            height: 200,
-            child: _LineChartWidget(p: p, r: r),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(width: 10, height: 10, color: AppColors.teal),
+                  const SizedBox(width: 4),
+                  const Text('Expenses', style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                  const SizedBox(width: 16),
+                  Container(width: 10, height: 10, color: AppColors.pink),
+                  const SizedBox(width: 4),
+                  const Text('Savings', style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 200,
+                child: _LineChartWidget(p: p, r: r),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -58,9 +75,26 @@ class AnalyticsScreen extends StatelessWidget {
         // ── BAR CHART ───────────────────────────────────────────────────────
         SectionCard(
           title: 'EXPECTED vs ACTUAL',
-          child: SizedBox(
-            height: 200,
-            child: _BarChartWidget(p: p, r: r),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(width: 10, height: 10, color: AppColors.teal),
+                  const SizedBox(width: 4),
+                  const Text('Expected', style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                  const SizedBox(width: 16),
+                  Container(width: 10, height: 10, color: AppColors.lavender),
+                  const SizedBox(width: 4),
+                  const Text('Actual', style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 200,
+                child: _BarChartWidget(p: p, r: r),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -155,6 +189,7 @@ class _LineChartWidget extends StatelessWidget {
         FlSpot(i.toDouble(), ((trend[i]['savings'] as double) * r)));
 
     return LineChart(LineChartData(
+      minY: 0, // Prevent negative curve dips
       backgroundColor: Colors.transparent,
       gridData: FlGridData(
         show: true,
@@ -170,20 +205,20 @@ class _LineChartWidget extends StatelessWidget {
             return Text(monthLabels[i], style: const TextStyle(color: AppColors.textMuted, fontSize: 10));
           },
         )),
-        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       borderData: FlBorderData(show: false),
       lineBarsData: [
         LineChartBarData(
           spots: expSpots, isCurved: true, color: AppColors.teal,
-          barWidth: 2.5, dotData: FlDotData(show: true),
-          belowBarData: BarAreaData(show: true, color: AppColors.teal.withOpacity(0.12)),
+          barWidth: 2.5, dotData: const FlDotData(show: true),
+          belowBarData: BarAreaData(show: true, color: AppColors.teal.withValues(alpha: 0.12)),
         ),
         LineChartBarData(
           spots: savSpots, isCurved: true, color: AppColors.pink,
-          barWidth: 2.5, dotData: FlDotData(show: true),
+          barWidth: 2.5, dotData: const FlDotData(show: true),
         ),
       ],
     ));
@@ -219,9 +254,9 @@ class _BarChartWidget extends StatelessWidget {
             return Text(labels[i], style: const TextStyle(color: AppColors.textMuted, fontSize: 9));
           },
         )),
-        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       borderData: FlBorderData(show: false),
       barGroups: List.generate(labels.length, (i) => BarChartGroupData(
@@ -231,6 +266,18 @@ class _BarChartWidget extends StatelessWidget {
           BarChartRodData(toY: actualUSD[i]   * r, color: AppColors.lavender, width: 10, borderRadius: BorderRadius.circular(4)),
         ],
       )),
+      barTouchData: BarTouchData(
+        touchTooltipData: BarTouchTooltipData(
+          getTooltipColor: (_) => AppColors.surface,
+          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+            String title = rodIndex == 0 ? 'Expected' : 'Actual';
+            return BarTooltipItem(
+              '$title\n${rod.toY.toStringAsFixed(0)}',
+              const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            );
+          },
+        ),
+      ),
     ));
   }
 }

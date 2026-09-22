@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../state/budget_provider.dart';
+import '../../services/auth_service.dart';
 import 'overview_screen.dart';
 import 'budgets_screen.dart';
 import 'history_screen.dart';
@@ -41,7 +42,7 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Budget Planner'),
+        title: const Text('Budget Planner', style: TextStyle(fontSize: 18)),
         actions: [
           // Month selector
           TextButton.icon(
@@ -60,6 +61,14 @@ class _MainShellState extends State<MainShell> {
               provider.currency,
               style: const TextStyle(color: AppColors.lavender, fontWeight: FontWeight.w700),
             ),
+          ),
+          // Logout button
+          IconButton(
+            icon: const Icon(Icons.logout, size: 20, color: AppColors.peach),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await context.read<AuthService>().signOut();
+            },
           ),
           const SizedBox(width: 4),
         ],
@@ -104,7 +113,7 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _pickCurrency(BuildContext ctx, BudgetProvider provider) {
-    final currencies = Currencies.all;
+    const currencies = Currencies.all;
     showDialog(
       context: ctx,
       builder: (_) => SimpleDialog(

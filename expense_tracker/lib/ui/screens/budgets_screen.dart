@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../state/budget_provider.dart';
 import '../../constants/app_colors.dart';
-import '../widgets/section_card.dart';
 
 class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});
@@ -24,7 +23,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final p = context.watch<BudgetProvider>();
-    final fmt = (double usd) => Currencies.format(usd, p.currency);
+    String fmt(double usd) => Currencies.format(usd, p.currency);
 
     return Column(children: [
       Container(
@@ -71,7 +70,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> with SingleTickerProvider
                         color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 14))),
                     if (cat.dueDay != null)
                       Text('Due: ${cat.dueDay}th', style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
-                    if (cat.paid != null && (type == 'bill' || type == 'debt' || type == 'savings'))
+                    if (type == 'bill' || type == 'debt' || type == 'savings')
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: GestureDetector(
@@ -79,9 +78,9 @@ class _BudgetsScreenState extends State<BudgetsScreen> with SingleTickerProvider
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: cat.paid ? AppColors.teal.withOpacity(0.15) : AppColors.divider.withOpacity(0.3),
+                              color: cat.paid ? AppColors.teal.withValues(alpha: 0.15) : AppColors.divider.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: cat.paid ? AppColors.teal.withOpacity(0.4) : AppColors.divider),
+                              border: Border.all(color: cat.paid ? AppColors.teal.withValues(alpha: 0.4) : AppColors.divider),
                             ),
                             child: Text(cat.paid ? '✓ Paid' : 'Mark Paid',
                                 style: TextStyle(color: cat.paid ? AppColors.teal : AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w700)),

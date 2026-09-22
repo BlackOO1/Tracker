@@ -25,7 +25,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<BudgetProvider>();
-    final fmt = (double usd) => Currencies.format(usd, p.currency);
+    String fmt(double usd) => Currencies.format(usd, p.currency);
 
     final txns = p.monthlyTransactions.where((tx) {
       final qMatch = tx.category.toLowerCase().contains(_query.toLowerCase()) ||
@@ -65,13 +65,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 selected: _typeFilter == t,
                 label: Text(t == 'all' ? 'All' : t[0].toUpperCase() + t.substring(1)),
                 onSelected: (_) => setState(() => _typeFilter = t),
-                selectedColor: AppColors.teal.withOpacity(0.25),
+                selectedColor: AppColors.teal.withValues(alpha: 0.25),
                 backgroundColor: AppColors.surface,
                 side: BorderSide(color: _typeFilter == t ? AppColors.teal : AppColors.divider),
                 labelStyle: TextStyle(
                   color: _typeFilter == t ? AppColors.teal : AppColors.textMuted,
                   fontSize: 11, fontWeight: FontWeight.w600,
                 ),
+              ),
+            ),
+          
+          const SizedBox(width: 8),
+          // Clear All Button
+          if (p.allTransactions.isNotEmpty)
+            TextButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.surfaceAlt,
+                    title: const Text('Clear All', style: TextStyle(color: Colors.white)),
+                    content: const Text('Are you sure you want to delete all transactions? This cannot be undone.', style: TextStyle(color: AppColors.textMuted)),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.peach),
+                        onPressed: () {
+                          p.clearAllTransactions();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Delete All', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.delete_sweep, color: AppColors.peach, size: 16),
+              label: const Text('Clear All', style: TextStyle(color: AppColors.peach, fontSize: 11, fontWeight: FontWeight.bold)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
         ]),
@@ -96,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
                     decoration: BoxDecoration(
-                      color: AppColors.peach.withOpacity(0.2),
+                      color: AppColors.peach.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(Icons.delete_outline, color: AppColors.peach),
@@ -112,7 +146,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     child: Row(children: [
                       Container(
                         width: 38, height: 38,
-                        decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+                        decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
                         child: Center(child: Text(isIn ? '+' : '−',
                             style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 16))),
                       ),
@@ -123,7 +157,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
                           const SizedBox(width: 6),
                           Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                             child: Text(tx.type, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w700))),
                         ]),
                         const SizedBox(height: 2),
